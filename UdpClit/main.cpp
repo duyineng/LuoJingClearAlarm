@@ -14,35 +14,30 @@ struct DevInfo
 	uint16_t port;	
 };
 
-int readJsonFile(std::string filename, DevInfo* devInfos[]);
-int readJsonFile2(std::string filename, std::unique_ptr<DevInfo[]>& upDevInfos);
+int readJsonFile(std::string filename, std::unique_ptr<DevInfo[]>& upDevInfos);
 
 int main()
 {
+	// json文件的内容读到upDevInfos中
 	std::unique_ptr<DevInfo[]>	upDevInfos;
-	
-	int devNum = readJsonFile2("ipConfig.json", upDevInfos);
+	int devNum = readJsonFile("ipConfig.json", upDevInfos);
 	if(devNum == -1)
 	{
 		std::cerr<<"readJsonFile() err"<<std::endl;
 		
 		return -1;
 	}
-	std::cout<<"devNum = "<<devNum<<std::endl;
 	
-	UdpClit clit[devNum];
-
 	// 初始化所有客户端的网络参数
 	int index = 0;
+	UdpClit clit[devNum];
 	for(auto& tempClit : clit)
 	{
-		DevInfo devInfo = upDevInfos.get()[index];
+		DevInfo devInfo = upDevInfos.get()[index++];
 		tempClit.initNetParam(devInfo.ip, devInfo.port);	
-
-		index++;
 	}
 
-	// 创建多个线程，让多个客户端
+	// 创建多个线程
 	std::vector<pthread_t> vecTid(devNum);	
 	for(int i = 0; i < devNum; i++)	
 	{
@@ -71,42 +66,8 @@ int main()
 	return 0;
 }
 
-// 传入json文件名，和设备信息结构体数组地址
-int readJsonFile(std::string filename, DevInfo* devInfos[])
-{
-	std::ifstream ifs(filename.data());	
-	if(!ifs.is_open())
-	{
-		std::cerr<<"open jsonfile  err"<<std::endl;
-	
-		return -1;
-	}
-
-	Json::Value root;
-	Json::Reader reader;
-	bool bl = reader.parse(ifs, root);
-	if(!bl)
-	{
-		std::cerr<<"reader.parse() err"<<std::endl;
-	
-		return -1;
-	}
-
-	*devInfos = new DevInfo[root.size()];	
-
-	int index = 0;
-	for(const auto& tempValue : root)
-	{
-		devInfos[index]->ip = tempValue["devIp"].asString();	
-		devInfos[index]->port = static_cast<uint16_t>(tempValue["devPort"].asUInt());	
-		
-		index++;
-	}
-
-	return root.size();
-}
-
-int readJsonFile2(std::string filename, std::unique_ptr<DevInfo[]>& upDevInfos)
+// 传入json文件名和设备信息结构体数组地址
+int readJsonFile(std::string filename, std::unique_ptr<DevInfo[]>& upDevInfos)
 {
 	std::ifstream ifs(filename.data());	
 	if(!ifs.is_open())
