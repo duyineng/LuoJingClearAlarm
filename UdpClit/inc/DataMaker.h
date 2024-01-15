@@ -2,22 +2,22 @@
 
 #include <memory>
 
-class DataPacket
+class DataMaker
 {
 public:
 	// 默认构造函数
-	DataPacket();
+	DataMaker();
 	// 有参构造函数
-	explicit DataPacket(int len);
+	explicit DataMaker(int len);
 	// 删除拷贝构造
-	DataPacket(const DataPacket&) = delete;		
+	DataMaker(const DataMaker&) = delete;		
 	// 删除赋值运算符重载
-	DataPacket& operator=(const DataPacket&) = delete;	
-	~DataPacket();
+	DataMaker& operator=(const DataMaker&) = delete;	
+	~DataMaker();
 
 	void mallocDataLen(int len);
 	int getDataLen();
-	const char* getClearData();
+	const char* getClearAlarmData();
 private:
 	template<typename T>
 	int writeData(size_t startIndex, size_t len, T value);

@@ -5,7 +5,7 @@
 #include <functional>
 #include <unistd.h>
 #include "UdpClit.h"
-#include "DataPacket.h"
+#include "DataMaker.h"
 
 // plc的设备信息
 struct DevInfo
@@ -43,21 +43,19 @@ int main()
 	}
 
 	// 创建多个线程，让多个客户端
-	std::vector<pthread_t> tidVec(devNum);	
+	std::vector<pthread_t> vecTid(devNum);	
 	for(int i = 0; i < devNum; i++)	
 	{
-		pthread_create(&tidVec[i], nullptr, [](void* arg) -> void* {
+		pthread_create(&vecTid[i], nullptr, [](void* arg) -> void* {
 
 			UdpClit* clit = static_cast<UdpClit*>(arg);
 
-			DataPacket dataPacket(40);	
-			int dataLen = dataPacket.getDataLen();
-			std::cout<<"dataLen ="<<dataLen<<std::endl;
+			DataMaker dataMaker(40);	
 			while(1)			
 			{
-				const char* data = dataPacket.getClearData();	
-				clit->sendMsg(data, dataLen);
-				sleep(1);
+				clit->sendMsg(dataMaker.getClearAlarmData(), dataMaker.getDataLen());
+
+				usleep(100 * 1000);
 			}
 
 			return nullptr;
@@ -65,7 +63,7 @@ int main()
 		},static_cast<void*>(&clit[i]));	
 	}
 	
-	for(auto& tid : tidVec)
+	for(auto& tid : vecTid)
 	{
 		pthread_join(tid, nullptr);
 	}

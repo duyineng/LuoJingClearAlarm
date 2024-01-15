@@ -1,4 +1,4 @@
-#include "DataPacket.h"
+#include "DataMaker.h"
 
 #include <iostream>
 #include <sys/socket.h>
@@ -6,39 +6,39 @@
 #include <arpa/inet.h>
 
 // 默认构造函数
-DataPacket::DataPacket()
+DataMaker::DataMaker()
 {
 
 }
 
 // 有参构造函数
-DataPacket::DataPacket(int len)
+DataMaker::DataMaker(int len)
 {
 	m_dataLen = len;
 	m_data = std::unique_ptr<char[]>(new char[len]);
 }
 
 // 析构函数
-DataPacket::~DataPacket()
+DataMaker::~DataMaker()
 {
 
 }
 
 // 分配数据包长度
-void DataPacket::mallocDataLen(int len)
+void DataMaker::mallocDataLen(int len)
 {
 	m_dataLen = len;
 	m_data = std::unique_ptr<char[]>(new char[len]);
 }
 
 // 获取数据包长度
-int DataPacket::getDataLen()
+int DataMaker::getDataLen()
 {
 	return m_dataLen;	
 }
 
 // 获取用于清除告警的数据包
-const char* DataPacket::getClearData()
+const char* DataMaker::getClearAlarmData()
 {
 	int ret = writeData<uint16_t>(0, 2, 1);		
 	if(ret == -1)
@@ -68,7 +68,7 @@ const char* DataPacket::getClearData()
 }
 
 template<typename T>
-int DataPacket::writeData(size_t startIndex, size_t len, T value)
+int DataMaker::writeData(size_t startIndex, size_t len, T value)
 {
 	if((startIndex + len) > 40)	
 	{
